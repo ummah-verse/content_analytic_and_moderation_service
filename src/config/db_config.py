@@ -12,6 +12,8 @@ DB_PORT = os.getenv('DB_PORT')
 
 def get_db_connection():
     """Membuat dan mengembalikan koneksi ke database."""
+    
+    print(DB_PASSWORD)
     conn = psycopg2.connect(
         host=DB_HOST,
         database=DB_NAME,

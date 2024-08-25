@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from src.services.data_analysis import perform_data_analysis
+from src.services.data_analysis import perform_data_analysis, fetch_data
 from src.services.image_validator import validate_image
 from src.middlewares.auth_middleware import token_required
 
@@ -35,6 +35,11 @@ def predict():
 def data_analysis():
     """Route untuk menjalankan analisis data."""
     result = perform_data_analysis()
+    return jsonify(result)
+
+@app.route('/user', methods=['GET'])
+def get_user_controller():
+    result = fetch_data()
     return jsonify(result)
 
 if __name__ == '__main__':
