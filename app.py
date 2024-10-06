@@ -107,5 +107,7 @@ def check_text():
     
     return jsonify({"message": "success"}), 200
 
+
+    
 if __name__ == '__main__':
     app.run(debug=True)
