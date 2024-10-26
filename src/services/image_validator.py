@@ -33,16 +33,25 @@ def validate_image(image_data):
         infer = model.signatures['serving_default']
         input_tensor = tf.convert_to_tensor(data, dtype=tf.float32)
         predictions = infer(input_tensor)
+        
+        print("Output keys:", predictions.keys())  # Add this line for debugging
 
         # Assuming the output layer is called 'sequential_3', adjust if needed
-        output = predictions['sequential_3']  
+        output = predictions['sequential_41']  
         output_array = output.numpy()
 
         # Get the class index with the highest confidence
         class_index = np.argmax(output_array)
 
         # Class names for the model
-        class_names = ["Anjing", "Cewek Normal", "Cewek Hijab - Abaya", "Cewe Gabener", "Cowo Jelek", "Random"]
+        # Urutan dari labels.txt
+        
+        print(class_index)
+        
+        class_names = [
+            "Boobs", "Ass", "Vagina", "Penis", "Female Nude", "Muscle", 
+            "Female Inappropriate", "Female", "Male", "Hijab", "Random", "Abaya Nakal"
+        ]
         class_name = class_names[class_index]
         
         print(class_name)

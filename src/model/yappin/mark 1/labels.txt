@@ -1,0 +1,6 @@
+0 Anjing
+1 Cewek Normal
+2 Cewek Hijab - Abaya
+3 Cewe Gabener
+4 Cowo Jelek
+5 Random

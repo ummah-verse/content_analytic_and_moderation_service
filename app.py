@@ -21,26 +21,23 @@ def predict():
             return jsonify({'error': 'No image data received'}), 400
 
         class_name = validate_image(image_data)
-        
         print(class_name)
 
         if class_name is None:
             return jsonify({'error': 'Internal Server Error'}), 500
 
-        if class_name == 'Cewek Hijab - Abaya':
-            return jsonify({'message': 'success'}), 200
-        elif class_name == 'Cewe Gabener':
-            return jsonify({'message': 'image is not valid'}), 400
-        elif class_name == 'Cewek Normal':
-            return jsonify({'message': 'success'}), 200
-        elif class_name == 'Cowo Jelek':
-            return jsonify({'message': 'success'}), 200
-        elif class_name == 'Random':
-            return jsonify({'message': 'success'}), 200
+        # Daftar kelas yang diperbolehkan
+        allowed_classes = ['Random', 'Female', 'Male', 'Hijab', 'Muscle']
+
+        # Cek apakah class_name termasuk kelas yang diperbolehkan
+        if class_name in allowed_classes:
+            return jsonify({'message': 'success', 'type': class_name}), 200
         else:
-            return jsonify({'message': 'success'}), 200
+            return jsonify({'error': 'image is not valid'}), 400
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
     
 @app.route('/predict/video', methods=['POST'])
 def predict_video():
@@ -51,7 +48,7 @@ def predict_video():
         video_dir = './temp_videos'
         if not os.path.exists(video_dir):
             os.makedirs(video_dir, exist_ok=True)
-        
+
         video_id = str(uuid.uuid4())
         video_path = f'{video_dir}/{video_id}.mp4'
 
@@ -59,25 +56,36 @@ def predict_video():
             f.write(request.data)
 
         frames = extract_frames(video_path, interval=1)
-        
+
         valid_frames = 0
+        invalid_frame_detected = False
+        # Daftar kelas yang diperbolehkan
+        allowed_classes = ['Random', 'Female', 'Male', 'Hijab', 'Muscle']
+
         for frame in frames:
             _, buffer = cv2.imencode('.jpg', frame)
             image_data = io.BytesIO(buffer).getvalue()
 
             class_name = validate_image(image_data)
-            if class_name == 'Cewek Hijab - Abaya':
+            # Cek kelas untuk validasi
+            if class_name in allowed_classes:
                 valid_frames += 1
+            else:
+                invalid_frame_detected = True  # Set invalid flag jika ada kelas yang tidak diperbolehkan
 
         os.remove(video_path)
 
-        if valid_frames > 0:
-            return jsonify({'message': 'success', 'valid_frames': valid_frames}), 200
-        else:
-            return jsonify({'message': 'success'}), 400
+        # Jika ada frame yang tidak valid, return error
+        if invalid_frame_detected:
+            return jsonify({'error': 'Invalid frame detected'}), 400
+
+        # Jika semua frame valid, return jumlah valid frames
+        return jsonify({'message': 'success', 'valid_frames': valid_frames}), 200
+
     except Exception as e:
         print(e)
         return jsonify({'error': str(e)}), 500
+
 
 
 @app.route('/data-analysis', methods=['GET'])
