@@ -365,6 +365,88 @@ def check_text():
 
     return jsonify({"message": "success"}), 200
 
+@app.route('/check-text/reminder', methods=['POST'])
+def check_text_reminder():
+    data = request.get_json()
+
+    # Extract the three text fields
+    fields = {
+        "text": data.get("text", ""),
+        "title": data.get("title", ""),
+        "location": data.get("location", "")
+    }
+
+    # Loop through each field and check for violations
+    for field_name, content in fields.items():
+        results = toxicity_model(content)
+        if any(
+            (result['label'] == 'toxicity' and result['score'] > 0.4) or
+            (result['label'] == 'black' and result['score'] > 0.8) or
+            (result['label'] == 'sexual_explicit' and result['score'] > 0.3) or
+            (result['label'] == 'threat' and result['score'] > 0.5)
+            for result in results
+        ):
+            print(f"Violation detected in {field_name}: {results}")
+            return jsonify({"message": "content violates our policy"}), 400
+
+    return jsonify({"message": "success"}), 200
+
+@app.route('/check-text/yapping', methods=['POST'])
+def check_text_yapping():
+    data = request.get_json()
+
+    # Extract the three text fields
+    fields = {
+        "text": data.get("text", ""),
+        "location": data.get("location", "")
+    }
+
+    # Loop through each field and check for violations
+    for field_name, content in fields.items():
+        results = toxicity_model(content)
+        if any(
+            (result['label'] == 'toxicity' and result['score'] > 0.4) or
+            (result['label'] == 'black' and result['score'] > 0.8) or
+            (result['label'] == 'sexual_explicit' and result['score'] > 0.3) or
+            (result['label'] == 'threat' and result['score'] > 0.5)
+            for result in results
+        ):
+            print(f"Violation detected in {field_name}: {results}")
+            return jsonify({"message": "content violates our policy"}), 400
+
+    return jsonify({"message": "success"}), 200
+
+
+@app.route('/check-text/profile', methods=['POST'])
+def check_text_profile():
+    data = request.get_json()
+
+    # Optional fields
+    fields = {
+        "username": data.get("username"),
+        "name": data.get("name"),
+        "bio": data.get("bio")
+    }
+
+    # Check if at least one field is provided
+    if all(value is None for value in fields.values()):
+        return jsonify({"message": "success"}), 200
+
+    # Loop through each provided field and run toxicity check
+    for field_name, content in fields.items():
+        if content:  # Only check if field is not None
+            results = toxicity_model(content)
+            if any(
+                (result['label'] == 'toxicity' and result['score'] > 0.4) or
+                (result['label'] == 'black' and result['score'] > 0.8) or
+                (result['label'] == 'sexual_explicit' and result['score'] > 0.3) or
+                (result['label'] == 'threat' and result['score'] > 0.5)
+                for result in results
+            ):
+                print(f"Violation detected in {field_name}: {results}")
+                return jsonify({"message": "content violates our policy"}), 400
+
+    return jsonify({"message": "success"}), 200
 
     
 if __name__ == '__main__':
